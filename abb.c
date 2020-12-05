@@ -23,15 +23,15 @@ typedef struct abb{
  */
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 	abb_t * nuevo_arbol = malloc(sizeof(abb_t));
-	if (!nuevo_arbol){
-		return NULL;
-	}
+	if (nuevo_arbol){
 	nuevo_arbol->cantidad = 0;
 	nuevo_arbol->comparador = NULL;
 	nuevo_arbol->destructor = NULL;
 	nuevo_arbol->raiz = NULL;
+	}
 	return nuevo_arbol;
 }
+
 
 
 /* Guarda un elemento en el arbol, si la clave ya se encuentra en la
@@ -63,6 +63,10 @@ void *abb_obtener(const abb_t *arbol, const char *clave);
  */
 bool abb_pertenece(const abb_t *arbol, const char *clave);
 
+bool abb_vacio(abb_t * arbol){
+	return(abb_cantidad(arbol) == 0);
+}
+
 
 /* Devuelve la cantidad de elementos del arbol.
  * Pre: La estructura fue inicializada
@@ -77,3 +81,32 @@ size_t abb_cantidad(abb_t *arbol){
  * Post: La estructura arbol fue destruida
  */
 void abb_destruir(abb_t *arbol);
+
+
+//==============================================================================
+
+
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
+
+
+//==============================================================================
+
+
+typedef struct abb_iter {
+	abb_t *arbol;
+}abb_iter_t;
+
+
+abb_iter_t *abb_iter_in_crear(const abb_t *arbol);
+
+
+bool abb_iter_in_avanzar(abb_iter_t *iter);
+
+
+const char *abb_iter_in_ver_actual(const abb_iter_t *iter);
+
+
+bool abb_iter_in_al_final(const abb_iter_t *iter);
+
+
+void abb_iter_in_destruir(abb_iter_t* iter);
