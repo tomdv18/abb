@@ -25,13 +25,29 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 	abb_t * nuevo_arbol = malloc(sizeof(abb_t));
 	if (nuevo_arbol){
 	nuevo_arbol->cantidad = 0;
-	nuevo_arbol->comparador = NULL;
-	nuevo_arbol->destructor = NULL;
 	nuevo_arbol->raiz = NULL;
+	nuevo_arbol->comparador = cmp;
+	nuevo_arbol->destructor = destruir_dato;
 	}
 	return nuevo_arbol;
 }
 
+/*Pre: Recibe un arbol y dos nodos
+ * Destruye un nodo, liberando su memoria y reemplazandola por un nuevo nodo
+ */
+void reemplazar(abb_t * arbol, nodo_abb_t * nodo_a_borrar, nodo_abb_t * nodo_insertar){
+	nodo_abb_t * copiaizq = nodo_a_borrar->izq;
+	nodo_abb_t * copiader = nodo_a_borrar->der;
+	if (arbol->destructor != NULL){
+		void * dato = nodo_a_borrar->dato;
+		arbol->destructor(dato);
+	}
+	free(nodo_a_borrar->clave);
+	free(nodo_a_borrar);
+	nodo_insertar->izq = copiaizq;
+	nodo_insertar->der = copiader;
+
+}
 
 
 /* Guarda un elemento en el arbol, si la clave ya se encuentra en la
@@ -39,7 +55,19 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
  * Pre: La estructura fue inicializada
  * Post: Se almacenó el par (clave, dato)
  */
-bool abb_guardar(abb_t *arbol, const char *clave, void *dato);
+bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
+	char * copia = strdup(clave);
+	if (!copia){
+		return false;
+	}
+	nodo_abb_t * nodo_insertar = malloc(sizeof(nodo_abb_t));
+	if (!nodo_insertar){
+		free(copia);
+		return false;
+	}
+
+// ACA ME FALTA SEGUIR TRABAJANDO
+}
 
 
 /* Borra un elemento del arbol y devuelve el dato asociado.  Devuelve
@@ -57,11 +85,19 @@ void *abb_borrar(abb_t *arbol, const char *clave);
  */
 void *abb_obtener(const abb_t *arbol, const char *clave);
 
+bool _abb_pertenece(const abb_t *arbol, const char *clave_buscada, char *clave_obtenida){
+
+// ACA ME FALTA SEGUIR TRABAJANDO PERO EN SI ES BUSCAR UN NODO
+}
 
 /*Devuelve verdadero si la clave pertenece al arbol
  *Pre: La estructura fue inicializada
  */
-bool abb_pertenece(const abb_t *arbol, const char *clave);
+bool abb_pertenece(const abb_t *arbol, const char *clave){
+	char * clave2;
+	strcpy(clave2, arbol->raiz);
+	return _abb_pertenece(arbol, clave, clave2);
+}
 
 bool abb_vacio(abb_t * arbol){
 	return(abb_cantidad(arbol) == 0);
