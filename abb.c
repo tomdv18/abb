@@ -85,7 +85,7 @@ void *abb_borrar(abb_t *arbol, const char *clave);
  */
 void *abb_obtener(const abb_t *arbol, const char *clave);
 
-bool _abb_pertenece(const abb_t *arbol, const char *clave_buscada, char *clave_obtenida){
+bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_obtenida){
 
 // ACA ME FALTA SEGUIR TRABAJANDO PERO EN SI ES BUSCAR UN NODO
 }
@@ -96,7 +96,7 @@ bool _abb_pertenece(const abb_t *arbol, const char *clave_buscada, char *clave_o
 bool abb_pertenece(const abb_t *arbol, const char *clave){
 	char * clave2;
 	strcpy(clave2, arbol->raiz);
-	return _abb_pertenece(arbol, clave, clave2);
+	return _abb_pertenece(arbol->raiz, clave, clave2);
 }
 
 bool abb_vacio(abb_t * arbol){
