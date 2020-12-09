@@ -36,39 +36,39 @@ static void prueba_iterar_arbol_vacio(){
     abb_destruir(arbol);
 }
 
-// CAMBIAR A PARTIR DE ACA
-static void prueba_hash_insertar(){
-    hash_t* hash = hash_crear(NULL);
+static void prueba_arbol_insertar(){
+    abb_t* abb = abb_crear(strcmp, NULL);
 
     char *clave1 = "perro", *valor1 = "guau";
     char *clave2 = "gato", *valor2 = "miau";
     char *clave3 = "vaca", *valor3 = "mu";
 
     /* Inserta 1 valor y luego lo borra */
-    print_test("Prueba hash insertar clave1", hash_guardar(hash, clave1, valor1));
-    print_test("Prueba hash la cantidad de elementos es 1", hash_cantidad(hash) == 1);
-    print_test("Prueba hash obtener clave1 es valor1", hash_obtener(hash, clave1) == valor1);
-    print_test("Prueba hash obtener clave1 es valor1", hash_obtener(hash, clave1) == valor1);
-    print_test("Prueba hash pertenece clave1, es true", hash_pertenece(hash, clave1));
-    print_test("Prueba hash borrar clave1, es valor1", hash_borrar(hash, clave1) == valor1);
-    print_test("Prueba hash la cantidad de elementos es 0", hash_cantidad(hash) == 0);
+    print_test("Prueba arbol insertar clave1", abb_guardar(abb, clave1, valor1));
+    print_test("Prueba arbol la cantidad de elementos es 1", abb_cantidad(abb) == 1);
+    print_test("Prueba arbol obtener clave1 es valor1", abb_obtener(abb, clave1) == valor1);
+    print_test("Prueba arbol obtener clave1 es valor1", abb_obtener(abb, clave1) == valor1);
+    print_test("Prueba arbol pertenece clave1, es true", abb_pertenece(abb, clave1));
+    print_test("Prueba arbol borrar clave1, es valor1", abb_borrar(abb, clave1) == valor1);
+    print_test("Prueba arbol la cantidad de elementos es 0", abb_cantidad(abb) == 0);
 
-    /* Inserta otros 2 valores y no los borra (se destruyen con el hash) */
-    print_test("Prueba hash insertar clave2", hash_guardar(hash, clave2, valor2));
-    print_test("Prueba hash la cantidad de elementos es 1", hash_cantidad(hash) == 1);
-    print_test("Prueba hash obtener clave2 es valor2", hash_obtener(hash, clave2) == valor2);
-    print_test("Prueba hash obtener clave2 es valor2", hash_obtener(hash, clave2) == valor2);
-    print_test("Prueba hash pertenece clave2, es true", hash_pertenece(hash, clave2));
+    /* Inserta otros 2 valores y no los borra (se destruyen con el arbol entero) */
+    print_test("Prueba arbol insertar clave2", abb_guardar(abb, clave2, valor2));
+    print_test("Prueba arbol la cantidad de elementos es 1", abb_cantidad(abb) == 1);
+    print_test("Prueba arbol obtener clave2 es valor2", abb_obtener(abb, clave2) == valor2);
+    print_test("Prueba arbol obtener clave2 es valor2", abb_obtener(abb, clave2) == valor2);
+    print_test("Prueba arbol pertenece clave2, es true", abb_pertenece(abb, clave2));
 
-    print_test("Prueba hash insertar clave3", hash_guardar(hash, clave3, valor3));
-    print_test("Prueba hash la cantidad de elementos es 2", hash_cantidad(hash) == 2);
-    print_test("Prueba hash obtener clave3 es valor3", hash_obtener(hash, clave3) == valor3);
-    print_test("Prueba hash obtener clave3 es valor3", hash_obtener(hash, clave3) == valor3);
-    print_test("Prueba hash pertenece clave3, es true", hash_pertenece(hash, clave3));
+    print_test("Prueba arbol insertar clave3", abb_guardar(abb, clave3, valor3));
+    print_test("Prueba arbol la cantidad de elementos es 2", abb_cantidad(abb) == 2);
+    print_test("Prueba arbol obtener clave3 es valor3", abb_obtener(abb, clave3) == valor3);
+    print_test("Prueba arbol obtener clave3 es valor3", abb_obtener(abb, clave3) == valor3);
+    print_test("Prueba arbol pertenece clave3, es true", abb_pertenece(abb, clave3));
 
-    hash_destruir(hash);
+    abb_destruir(arbol);
 }
 
+// CAMBIAR A PARTIR DE ACA
 static void prueba_hash_reemplazar()
 {
     hash_t* hash = hash_crear(NULL);
@@ -395,7 +395,7 @@ void pruebas_hash_catedra()
      */
     prueba_crear();
     prueba_iterar_abb_vacio();
-    prueba_hash_insertar();
+    prueba_arbol_insertar();
     prueba_hash_reemplazar();
     prueba_hash_reemplazar_con_destruir();
     prueba_hash_borrar();
