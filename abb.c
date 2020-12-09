@@ -212,6 +212,13 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 }
 
 
+/* 
+ * Recibe un arbol previamente inicializado 
+ * Devuelve verdadero si su cantidad de elementos es igual a cero
+ */
+bool abb_vacio(abb_t * arbol){
+	return(abb_cantidad(arbol) == 0);
+}
 
 /* Borra un elemento del arbol y devuelve el dato asociado.  Devuelve
  * NULL si el dato no estaba.
@@ -268,14 +275,6 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
 	return _abb_pertenece(arbol->raiz, clave, clave2, arbol->comparador);
 }
 
-/* 
- * Recibe un arbol previamente inicializado 
- * Devuelve verdadero si su cantidad de elementos es igual a cero
- */
-bool abb_vacio(abb_t * arbol){
-	return(abb_cantidad(arbol) == 0);
-}
-
 
 /* Devuelve la cantidad de elementos del arbol.
  * Pre: La estructura fue inicializada
@@ -322,8 +321,16 @@ typedef struct abb_iter {
 	abb_t *arbol;
 }abb_iter_t;
 
-
-abb_iter_t *abb_iter_in_crear(const abb_t *arbol);
+/* Crea un iterador. Devuelve NULL si falla
+ * Pre: La estructura arbol recibida fue inicializada
+ */
+abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
+	abb_iter_t * iter = malloc(sizeof(abb_iter_t));
+	if (iter){
+		iter->arbol = arbol;
+	}
+	return iter;
+}
 
 
 bool abb_iter_in_avanzar(abb_iter_t *iter);
