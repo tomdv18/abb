@@ -15,7 +15,7 @@ typedef void (*abb_destruir_dato_t) (void *);
 
 
 /*Crea un arbol asignandole su memoria, si falla devuelve NULL
- *
+ * Debe recibir dos parametros, un comparador de clave y un destructor de dato
  */
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato);
 

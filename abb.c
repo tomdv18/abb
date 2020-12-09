@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+const int SIN_HIJOS = 0;
+const int UN_HIJO = 1;
+const int DOS_HIJOS = 2;
 
 typedef struct nodo_abb{
 	struct nodo_abb * izq;
@@ -65,9 +68,126 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 		free(copia);
 		return false;
 	}
+	nodo_insertar->elemento = dato;
+	nodo_insertar->clave = copia;
+	bool pertenece = abb_pertenece(arbol, clave);
+
 
 // ACA ME FALTA SEGUIR TRABAJANDO
 }
+
+int cantidad_de_hijos(const nodo_abb_t * nodo){
+	if (nodo->der == NULL && nodo->izq == NULL){
+		return SIN_HIJOS;
+	}
+	if(nodo->der != NULL && nodo->izq != NULL){
+		return DOS_HIJOS;
+	}
+	return UN_HIJO;
+}
+//
+// FUNCION QUE LIBERA LA MEMORIA DE UN NODO 
+//
+void  borrar_nodo(nodo_abb_t * nodo){
+	free(nodo->clave);
+	free(nodo);
+}
+//Pre: recibe un nodo con dos hijos
+//  Devuelve el nodo reemplazante, el cual servira para borrar el nodo actual
+//
+nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior){
+	
+	anterior = nodo;
+	nodo_abb_t * nodo_reem = nodo->der;
+	while(nodo_reem->izq != NULL){
+		anterior = nodo;
+		nodo_reem = nodo_reem->izq;
+	}
+	return nodo_reem;
+}
+
+
+
+void * raiz_borrar(abb_t *arbol, const char * clave){
+	if (arbol->cmp(clave, arbol->raiz->clave) == 0){
+		nodo_abb_t * a_borrar = arbol->raiz
+		void * dato = a_borrar->elemento;
+		if ( cantidad_de_hijos(raiz) == DOS_HIJOS){
+		
+
+		}
+		if ( cantidad_de_hijos(raiz) == UN_HIJO){
+			if (a_borrar->der == NULL){
+				arbol->raiz = a_borrar->izq;
+			}
+			else{
+				arbol->raiz = a_borrar->der;
+			}
+		
+		}
+		else{
+
+		}
+		borrar_nodo(a_borrar);
+		return dato;
+	}
+	
+
+	if (arbol->cmp(clave, arbol->raiz->clave) > 0){
+		return abb_borrar_(abb->raiz, abb->raiz->izq, clave, abb->comparador);
+	}
+	return abb_borrar_(abb->raiz, abb->raiz->der, clave, abb->comparador);
+}
+
+void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *clave,  abb_comparar_clave_t cmp){
+	if (cmp(clave, nodo->clave) == 0){
+		void * dato = nodo->elemento;
+		int hijos = cantidad_de_hijos(nodo);
+		if ( hijos == DOS_HIJOS){
+			nodo_abb_t * anterior_reemplazante;
+			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante);
+			char* clave_reemplazante;
+			strcpy(clave_reemplazante, reemplazante->clave);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, cmp);
+			nodo->elemento = dato_suplente;
+			strcpy(nodo->clave, clave_reemplazante);
+			return dato;
+		}
+		if ( hijos == UN_HIJO){
+			if (nodo_anterior->izq == nodo){
+				if (nodo->izq != NULL){
+					nodo_anterior->izq = nodo->izq;
+				}
+				if(nodo->izq == NULL){
+					nodo_anterior->izq = nodo->der;
+				}
+			}
+			if (nodo_anterior->der == nodo){
+				if (nodo->izq != NULL){
+					nodo_anterior->der = nodo->izq;
+				}
+				if(nodo->izq == NULL){
+					nodo_anterior->der = nodo->der;
+				}
+			}
+		}
+		if (hijos == SIN_HIJOS){
+			if (nodo_anterior->izq == nodo){
+				nodo_anterior->izq == NULL;
+			}
+			else{
+				nodo_anterior->der == NULL;
+			}
+		}
+		borar_nodo(nodo);
+		return dato;
+	}
+	if (cmp(clave, nodo->clave) > 0){
+		return abb_borrar_(nodo, nodo->izq, clave, cmp);
+	}
+	return abb_borrar_(nodo, nodo->der, clave, cmp);
+}
+
 
 
 /* Borra un elemento del arbol y devuelve el dato asociado.  Devuelve
@@ -76,7 +196,12 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
  * Post: El elemento fue borrado de la estructura y se lo devolvió,
  * en el caso de que estuviera guardado.
  */
-void *abb_borrar(abb_t *arbol, const char *clave);
+void *abb_borrar(abb_t *arbol, const char *clave){
+	if (!abb_pertenece(arbol, clave)){
+		return NULL;
+	}
+	return raiz_borrar(arbol, const char* clave);
+}
 
 
 /* Obtiene el valor de un elemento del arbol, si la clave no se encuentra
@@ -85,9 +210,23 @@ void *abb_borrar(abb_t *arbol, const char *clave);
  */
 void *abb_obtener(const abb_t *arbol, const char *clave);
 
-bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_obtenida){
-
-// ACA ME FALTA SEGUIR TRABAJANDO PERO EN SI ES BUSCAR UN NODO
+bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_obtenida, abb_comparar_clave_t cmp){
+	strcpy(clave_obtenida, nodo->clave);
+	if (cmp(clave_buscada, clave_obtenida) == 0){
+		return true;
+	}
+	if (cmp(clave_buscada, clave_obtenida) < 0){
+		if (nodo->izq == NULL){
+			return false;
+		}
+		_abb_pertenece(nodo->izq, clave_buscada, clave_obtenida, cmp);
+	}
+	if (cmp(clave_buscada, clave_obtenida) > 0){
+		if (nodo->der == NULL){
+			return false;
+		}
+		_abb_pertenece(nodo->der, clave_buscada, clave_obtenida, cmp);
+	}	
 }
 
 /*Devuelve verdadero si la clave pertenece al arbol
@@ -95,8 +234,8 @@ bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_ob
  */
 bool abb_pertenece(const abb_t *arbol, const char *clave){
 	char * clave2;
-	strcpy(clave2, arbol->raiz);
-	return _abb_pertenece(arbol->raiz, clave, clave2);
+	strcpy(clave2, arbol->raiz->clave);
+	return _abb_pertenece(arbol->raiz, clave, clave2, arbol->comparador);
 }
 
 bool abb_vacio(abb_t * arbol){
@@ -122,8 +261,25 @@ void abb_destruir(abb_t *arbol);
 //==============================================================================
 
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
+void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *c, void *dato, void *extra), void *extra, bool * continuar){
+	if(nodo->izq != NULL && (*continuar == true)){
+    abb_in_order_(nodo->izq, visitar(c, dato, extra), extra, &(*continuar));
+	}
+	continuar = continuar && visitar(nodo->clave, nodo->elemento, extra, &(*continuar));
+	if(nodo->der != NULL && (*continuar == true)){
+    abb_in_order_(nodo->der, visitar(c, dato, extra), extra, &(*continuar));
+	}
+}
 
+void abb_in_order(abb_t *arbol, bool visitar(const char *c, void *dato, void *extra), void *extra){
+	if (!abb_vacio(arbol)){
+		bool continuar = true;
+		abb_in_order_(abb->raiz, visitar(c, dato, extra), extra, &continuar);
+		
+	}
+
+}
+	
 
 //==============================================================================
 
