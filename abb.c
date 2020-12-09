@@ -35,6 +35,13 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 	return nuevo_arbol;
 }
 
+// FUNCION QUE LIBERA LA MEMORIA DE UN NODO  
+// SIN AFECTAR SU DATO
+void  borrar_nodo(nodo_abb_t * nodo){
+	free(nodo->clave);
+	free(nodo);
+}
+
 /*Pre: Recibe un arbol y dos nodos
  * Destruye un nodo, liberando su memoria y reemplazandola por un nuevo nodo
  */
@@ -42,14 +49,12 @@ void reemplazar(abb_t * arbol, nodo_abb_t * nodo_a_borrar, nodo_abb_t * nodo_ins
 	nodo_abb_t * copiaizq = nodo_a_borrar->izq;
 	nodo_abb_t * copiader = nodo_a_borrar->der;
 	if (arbol->destructor != NULL){
-		void * dato = nodo_a_borrar->dato;
+		void * dato = nodo_a_borrar->elemento;
 		arbol->destructor(dato);
 	}
-	free(nodo_a_borrar->clave);
-	free(nodo_a_borrar);
+	borrar_nodo (nodo_a_borrar);
 	nodo_insertar->izq = copiaizq;
 	nodo_insertar->der = copiader;
-
 }
 
 
@@ -76,6 +81,11 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 // ACA ME FALTA SEGUIR TRABAJANDO
 }
 
+
+/* 
+ * Pre: Recibe un nodo
+ * Devuelve la cantidad de hijos del nodo
+ */
 int cantidad_de_hijos(const nodo_abb_t * nodo){
 	if (nodo->der == NULL && nodo->izq == NULL){
 		return SIN_HIJOS;
@@ -85,22 +95,21 @@ int cantidad_de_hijos(const nodo_abb_t * nodo){
 	}
 	return UN_HIJO;
 }
-//
-// FUNCION QUE LIBERA LA MEMORIA DE UN NODO 
-//
-void  borrar_nodo(nodo_abb_t * nodo){
-	free(nodo->clave);
-	free(nodo);
-}
-//Pre: recibe un nodo con dos hijos
+
+
+//	Pre: recibe un nodo con dos hijos
 //  Devuelve el nodo reemplazante, el cual servira para borrar el nodo actual
 //
-nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior){
+nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior, bool es_raiz){
 	
-	anterior = nodo;
+	if (es_raiz == false){
+	anterior = nodo;	
+	}
 	nodo_abb_t * nodo_reem = nodo->der;
 	while(nodo_reem->izq != NULL){
-		anterior = nodo;
+		if (es_raiz == false){
+			anterior = nodo;
+		}
 		nodo_reem = nodo_reem->izq;
 	}
 	return nodo_reem;
@@ -108,44 +117,58 @@ nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior){
 
 
 
-void * raiz_borrar(abb_t *arbol, const char * clave){
-	if (arbol->cmp(clave, arbol->raiz->clave) == 0){
-		nodo_abb_t * a_borrar = arbol->raiz
-		void * dato = a_borrar->elemento;
-		if ( cantidad_de_hijos(raiz) == DOS_HIJOS){
-		
 
+/* 
+ * Pre: recibe un arbol con al menos un elemento, y una clave que pertenece al arbol
+ *  Si la raiz es el elemento a borrar, la borra y remplaza
+ * Si no, llama a la funcion de borrado para cualquier elemento
+ */
+void * raiz_borrar(abb_t *arbol, const char * clave){
+	if (arbol->comparador(clave, arbol->raiz->clave) == 0){
+		nodo_abb_t * a_borrar = arbol->raiz;
+		void * dato = a_borrar->elemento;
+		if ( cantidad_de_hijos(a_borrar) == DOS_HIJOS){
+			nodo_abb_t * anterior_reemplazante;
+			nodo_abb_t * reemplazante = buscar_reemplazante(arbol->raiz, anterior_reemplazante, true);
+			char* clave_reemplazante;
+			strcpy(clave_reemplazante, reemplazante->clave);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, arbol->comparador);
+			arbol->raiz->elemento = dato_suplente;
+			strcpy(arbol->raiz->clave, clave_reemplazante);
+			return dato;	
 		}
-		if ( cantidad_de_hijos(raiz) == UN_HIJO){
+		if ( cantidad_de_hijos(a_borrar) == UN_HIJO){
 			if (a_borrar->der == NULL){
 				arbol->raiz = a_borrar->izq;
 			}
 			else{
 				arbol->raiz = a_borrar->der;
 			}
-		
 		}
 		else{
-
+			arbol->raiz = NULL;
 		}
 		borrar_nodo(a_borrar);
 		return dato;
 	}
-	
-
-	if (arbol->cmp(clave, arbol->raiz->clave) > 0){
+	if (arbol->comparador(clave, arbol->raiz->clave) > 0){
 		return abb_borrar_(abb->raiz, abb->raiz->izq, clave, abb->comparador);
 	}
 	return abb_borrar_(abb->raiz, abb->raiz->der, clave, abb->comparador);
 }
 
+
+/* Pre: La clave existe en el arbol
+ * Recibe dos nodos, inicializados, una clave y una funcion de comparacion
+ * Devuelve el dato asociado a esa clave
+ */
 void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *clave,  abb_comparar_clave_t cmp){
 	if (cmp(clave, nodo->clave) == 0){
 		void * dato = nodo->elemento;
 		int hijos = cantidad_de_hijos(nodo);
 		if ( hijos == DOS_HIJOS){
 			nodo_abb_t * anterior_reemplazante;
-			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante);
+			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante, false);
 			char* clave_reemplazante;
 			strcpy(clave_reemplazante, reemplazante->clave);
 			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, cmp);
@@ -173,10 +196,10 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 		}
 		if (hijos == SIN_HIJOS){
 			if (nodo_anterior->izq == nodo){
-				nodo_anterior->izq == NULL;
+				nodo_anterior->izq = NULL;
 			}
 			else{
-				nodo_anterior->der == NULL;
+				nodo_anterior->der = NULL;
 			}
 		}
 		borar_nodo(nodo);
@@ -197,9 +220,10 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
  * en el caso de que estuviera guardado.
  */
 void *abb_borrar(abb_t *arbol, const char *clave){
-	if (!abb_pertenece(arbol, clave)){
+	if (!abb_pertenece(arbol, clave) || abb_vacio(arbol)){
 		return NULL;
 	}
+	arbol->cantidad--;
 	return raiz_borrar(arbol, const char* clave);
 }
 
@@ -210,6 +234,12 @@ void *abb_borrar(abb_t *arbol, const char *clave){
  */
 void *abb_obtener(const abb_t *arbol, const char *clave);
 
+
+
+
+/*  Devuelve verdadero si la clave recibida existe en el arbol
+ * Pre: La estructura arbol fue inicializada, recibe un nodo y una clave previamente inicializados
+ */
 bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_obtenida, abb_comparar_clave_t cmp){
 	strcpy(clave_obtenida, nodo->clave);
 	if (cmp(clave_buscada, clave_obtenida) == 0){
@@ -238,6 +268,10 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
 	return _abb_pertenece(arbol->raiz, clave, clave2, arbol->comparador);
 }
 
+/* 
+ * Recibe un arbol previamente inicializado 
+ * Devuelve verdadero si su cantidad de elementos es igual a cero
+ */
 bool abb_vacio(abb_t * arbol){
 	return(abb_cantidad(arbol) == 0);
 }
