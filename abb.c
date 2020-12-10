@@ -25,6 +25,9 @@ typedef struct abb{
  *
  */
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
+	if(!cmp){
+		return NULL;
+	}
 	abb_t * nuevo_arbol = malloc(sizeof(abb_t));
 	if (nuevo_arbol){
 	nuevo_arbol->cantidad = 0;
@@ -47,7 +50,7 @@ void  borrar_nodo(nodo_abb_t * nodo){
  * Recibe un arbol previamente inicializado 
  * Devuelve verdadero si su cantidad de elementos es igual a cero
  */
-bool abb_vacio(abb_t * arbol){
+bool abb_vacio(const abb_t * arbol){
 	return(abb_cantidad(arbol) == 0);
 }
 
@@ -107,21 +110,22 @@ bool insertar_nuevo( nodo_abb_t * nodo, nodo_abb_t * nodo_insertar, abb_comparar
 		if (nodo->der != NULL){
 			return insertar_nuevo(nodo->der, nodo_insertar, comparador);
 		}
-		if(nodo->der == NULL){
+		else{
 			nodo->der = nodo_insertar;
 			return true;
 		}
 	}
-	if (comparador(nodo->clave, nodo_insertar->clave)  < 0){
+	else{
 		if (nodo->izq != NULL){
 			return insertar_nuevo(nodo->izq, nodo_insertar, comparador);
 		}
-		if (nodo->izq == NULL){
+		else {
 			nodo->izq = nodo_insertar;
 			return true;
 		}
 	}
 }
+
 
 
 /* Guarda un elemento en el arbol, si la clave ya se encuentra en la
@@ -154,24 +158,19 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 		bool cambiar_raiz = es_raiz(arbol, clave);
 		if (cambiar_raiz != true){
 			if (comparacion < 0){
-				return reemplazar_nodo(arbol, abb->raiz, abb->raiz->izq, nodo_insertar);
+				return reemplazar_nodo(arbol, arbol->raiz, arbol->raiz->izq, nodo_insertar);
 			}	
 			if (comparacion > 0){
-				return reemplazar_nodo(arbol, abb->raiz, abb->raiz->der, nodo_insertar);
+				return reemplazar_nodo(arbol, arbol->raiz, arbol->raiz->der, nodo_insertar);
 			}
 		}
-		reemplazar(arbol, abb->raiz, nodo_insertar);
-		abb->raiz = nodo_insertar;
+		reemplazar(arbol, arbol->raiz, nodo_insertar);
+		arbol->raiz = nodo_insertar;
 		return true;
 	}
-	if(!pertenece){
+	else{
 		bool se_pudo = true;
-		if (comparacion < 0){
-			se_pudo = se_pudo && insertar_nuevo(arbol->raiz->izq , nodo_insertar, arbol->comparador);
-		}
-		if (comparacion > 0){
-			se_pudo = se_pudo && insertar_nuevo(arbol->raiz->der , nodo_insertar, arbol->comparador);
-		}
+		se_pudo = se_pudo && insertar_nuevo(arbol->raiz , nodo_insertar, arbol->comparador);
 		if (se_pudo){
 			arbol->cantidad++;
 		}
@@ -223,13 +222,10 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 		void * dato = nodo->elemento;
 		int hijos = cantidad_de_hijos(nodo);
 		if ( hijos == DOS_HIJOS){
-			nodo_abb_t * anterior_reemplazante;
+			nodo_abb_t * anterior_reemplazante = NULL;
 			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante, false);
-			char* clave_reemplazante;
-			strcpy(clave_reemplazante, reemplazante->clave);
-			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, cmp);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, cmp);
 			nodo->elemento = dato_suplente;
-			strcpy(nodo->clave, clave_reemplazante);
 			return dato;
 		}
 		if ( hijos == UN_HIJO){
@@ -277,15 +273,14 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 void * raiz_borrar(abb_t *arbol, const char * clave){
 	if (arbol->comparador(clave, arbol->raiz->clave) == 0){
 		nodo_abb_t * a_borrar = arbol->raiz;
-		void * dato = a_borrar->elemento;
+		void * dato = NULL;
+		dato = a_borrar->elemento;
 		if ( cantidad_de_hijos(a_borrar) == DOS_HIJOS){
-			nodo_abb_t * anterior_reemplazante;
+			nodo_abb_t * anterior_reemplazante = NULL; 
 			nodo_abb_t * reemplazante = buscar_reemplazante(arbol->raiz, anterior_reemplazante, true);
-			char* clave_reemplazante;
-			strcpy(clave_reemplazante, reemplazante->clave);
-			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, arbol->comparador);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, arbol->comparador);
 			arbol->raiz->elemento = dato_suplente;
-			strcpy(arbol->raiz->clave, clave_reemplazante);
+			strcpy(arbol->raiz->clave, reemplazante->clave);
 			return dato;	
 		}
 		if ( cantidad_de_hijos(a_borrar) == UN_HIJO){
@@ -309,59 +304,6 @@ void * raiz_borrar(abb_t *arbol, const char * clave){
 }
 
 
-/* Pre: La clave existe en el arbol
- * Recibe dos nodos, inicializados, una clave y una funcion de comparacion
- * Devuelve el dato asociado a esa clave
- */
-void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *clave,  abb_comparar_clave_t cmp){
-	if (cmp(clave, nodo->clave) == 0){
-		void * dato = nodo->elemento;
-		int hijos = cantidad_de_hijos(nodo);
-		if ( hijos == DOS_HIJOS){
-			nodo_abb_t * anterior_reemplazante;
-			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante, false);
-			char* clave_reemplazante;
-			strcpy(clave_reemplazante, reemplazante->clave);
-			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, clave_reemplazante, cmp);
-			nodo->elemento = dato_suplente;
-			strcpy(nodo->clave, clave_reemplazante);
-			return dato;
-		}
-		if ( hijos == UN_HIJO){
-			if (nodo_anterior->izq == nodo){
-				if (nodo->izq != NULL){
-					nodo_anterior->izq = nodo->izq;
-				}
-				if(nodo->izq == NULL){
-					nodo_anterior->izq = nodo->der;
-				}
-			}
-			if (nodo_anterior->der == nodo){
-				if (nodo->izq != NULL){
-					nodo_anterior->der = nodo->izq;
-				}
-				if(nodo->izq == NULL){
-					nodo_anterior->der = nodo->der;
-				}
-			}
-		}
-		if (hijos == SIN_HIJOS){
-			if (nodo_anterior->izq == nodo){
-				nodo_anterior->izq = NULL;
-			}
-			else{
-				nodo_anterior->der = NULL;
-			}
-		}
-		borrar_nodo(nodo);
-		return dato;
-	}
-	if (cmp(clave, nodo->clave) > 0){
-		return abb_borrar_(nodo, nodo->izq, clave, cmp);
-	}
-	return abb_borrar_(nodo, nodo->der, clave, cmp);
-}
-
 
 /* Borra un elemento del arbol y devuelve el dato asociado.  Devuelve
  * NULL si el dato no estaba.
@@ -377,12 +319,38 @@ void *abb_borrar(abb_t *arbol, const char *clave){
 	return raiz_borrar(arbol, clave);
 }
 
+void *abb_obtener_(nodo_abb_t * nodo, const char* clave, const abb_t * arbol){
+	if (arbol->comparador(nodo->clave, clave) == 0){
+		return nodo->elemento;
+	}
+	if (arbol->comparador(clave, nodo->clave) < 0){
+		if (nodo->der == NULL){
+				return NULL;
+		}	
+		return abb_obtener_(nodo->der, clave, arbol);
+	}
+	else{
+		if (nodo->izq == NULL){
+			return NULL;
+		}
+		else{
+			return abb_obtener_(nodo->izq, clave, arbol);
+		}
+	}
+
+}
+
 
 /* Obtiene el valor de un elemento del arbol, si la clave no se encuentra
  * devuelve NULL.
  * Pre: La estructura fue inicializada
  */
-void *abb_obtener(const abb_t *arbol, const char *clave);
+void *abb_obtener(const abb_t *arbol, const char *clave){
+	if (abb_vacio(arbol)){
+		return NULL;
+	}
+	return abb_obtener_(arbol->raiz, clave, arbol);
+}
 
 
 
@@ -390,22 +358,25 @@ void *abb_obtener(const abb_t *arbol, const char *clave);
 /*  Devuelve verdadero si la clave recibida existe en el arbol
  * Pre: La estructura arbol fue inicializada, recibe un nodo y una clave previamente inicializados
  */
-bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_obtenida, abb_comparar_clave_t cmp){
-	strcpy(clave_obtenida, nodo->clave);
-	if (cmp(clave_buscada, clave_obtenida) == 0){
+bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, abb_comparar_clave_t cmp){
+	if (cmp(clave_buscada,  nodo->clave) == 0){
 		return true;
 	}
-	if (cmp(clave_buscada, clave_obtenida) < 0){
+	if (cmp(clave_buscada,  nodo->clave) > 0){
 		if (nodo->izq == NULL){
 			return false;
 		}
-		_abb_pertenece(nodo->izq, clave_buscada, clave_obtenida, cmp);
+		else{
+			return _abb_pertenece(nodo->izq, clave_buscada, cmp);
+		}
 	}
-	if (cmp(clave_buscada, clave_obtenida) > 0){
+	else {
 		if (nodo->der == NULL){
 			return false;
 		}
-		_abb_pertenece(nodo->der, clave_buscada, clave_obtenida, cmp);
+		else{
+			return _abb_pertenece(nodo->der, clave_buscada, cmp);
+		}
 	}	
 }
 
@@ -413,17 +384,33 @@ bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, char *clave_ob
  *Pre: La estructura fue inicializada
  */
 bool abb_pertenece(const abb_t *arbol, const char *clave){
-	char * clave2;
-	strcpy(clave2, arbol->raiz->clave);
-	return _abb_pertenece(arbol->raiz, clave, clave2, arbol->comparador);
+	if (abb_vacio(arbol)){
+		return false;
+	}
+	return _abb_pertenece(arbol->raiz, clave, arbol->comparador);
 }
 
 
 /* Devuelve la cantidad de elementos del arbol.
  * Pre: La estructura fue inicializada
  */
-size_t abb_cantidad(abb_t *arbol){
+size_t abb_cantidad(const abb_t *arbol){
 	return (arbol->cantidad);
+}
+
+void destruir_nodos(nodo_abb_t * nodo, abb_t *arbol){
+	if (nodo->izq){
+		destruir_nodos(nodo->izq, arbol);
+		nodo->izq = NULL;
+	}
+	if (nodo->der){
+		destruir_nodos(nodo->der, arbol);
+		nodo->der = NULL;
+	}
+	if (arbol->destructor){
+		arbol->destructor(nodo->elemento);
+	}
+	borrar_nodo(nodo);
 }
 
 /* Destruye la estructura liberando la memoria pedida y llamando a la función
@@ -431,42 +418,45 @@ size_t abb_cantidad(abb_t *arbol){
  * Pre: La estructura arnol fue inicializada
  * Post: La estructura arbol fue destruida
  */
-void abb_destruir(abb_t *arbol);
+void abb_destruir(abb_t *arbol){
+	if (!abb_vacio(arbol)){
+		destruir_nodos(arbol->raiz, arbol);
+	}
+	free(arbol);
 
+}
 
 //==============================================================================
+/*
 
-
-void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *c, void *dato, void *extra), void *extra, bool * continuar){
+void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *cadena, void *dato, void *extra), void *extra, bool * continuar){
 	if(nodo->izq != NULL && (*continuar == true)){
-    abb_in_order_(nodo->izq, visitar(c, dato, extra), extra, &(*continuar));
+    abb_in_order_(nodo->izq, visitar(nodo->izq->clave, nodo->izq->elemento, extra), extra, &(*continuar));
 	}
-	continuar = continuar && visitar(nodo->clave, nodo->elemento, extra, &(*continuar));
+	*continuar = *continuar && visitar(nodo->clave, nodo->elemento, extra, &(*continuar));
 	if(nodo->der != NULL && (*continuar == true)){
-    abb_in_order_(nodo->der, visitar(c, dato, extra), extra, &(*continuar));
+    abb_in_order_(nodo->der, visitar(nodo->der->clave, nodo->der->elemento, extra), extra, &(*continuar));
 	}
 }
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *c, void *dato, void *extra), void *extra){
+void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, void *extra), void *extra){
 	if (!abb_vacio(arbol)){
 		bool continuar = true;
-		abb_in_order_(abb->raiz, visitar(c, dato, extra), extra, &continuar);
+		abb_in_order_(arbol->raiz, visitar(cadena, dato, extra), extra, &continuar);
 		
 	}
 
 }
 	
-
+*/
 //==============================================================================
-
 
 typedef struct abb_iter {
 	abb_t *arbol;
 }abb_iter_t;
 
-/* Crea un iterador. Devuelve NULL si falla
- * Pre: La estructura arbol recibida fue inicializada
- */
+//Crea un iterador. Devuelve NULL si falla
+//Pre: La estructura arbol recibida fue inicializada
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
 	abb_iter_t * iter = malloc(sizeof(abb_iter_t));
 	if (iter){
@@ -474,7 +464,6 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
 	}						// DEL ARBOL, Y LUEGO HACERLE EL ITERADOR A ESA COPIA
 	return iter;
 }
-
 
 bool abb_iter_in_avanzar(abb_iter_t *iter);
 

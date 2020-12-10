@@ -14,6 +14,7 @@ typedef int (*abb_comparar_clave_t) (const char *, const char *);
 typedef void (*abb_destruir_dato_t) (void *);
 
 
+
 /*Crea un arbol asignandole su memoria, si falla devuelve NULL
  * Debe recibir dos parametros, un comparador de clave y un destructor de dato
  */
@@ -53,7 +54,7 @@ bool abb_pertenece(const abb_t *arbol, const char *clave);
 /* Devuelve la cantidad de elementos del arbol.
  * Pre: La estructura fue inicializada
  */
-size_t abb_cantidad(abb_t *arbol);
+size_t abb_cantidad(const abb_t *arbol);
 
 
 /* Destruye la estructura liberando la memoria pedida y llamando a la función
@@ -67,7 +68,7 @@ void abb_destruir(abb_t *arbol);
 //==============================================================================
 
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
+void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, void *extra), void *extra);
 
 
 //==============================================================================
