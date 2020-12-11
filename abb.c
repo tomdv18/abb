@@ -14,12 +14,12 @@ typedef struct nodo_abb{
 	void * elemento;
 }nodo_abb_t;
 
-typedef struct abb{
+struct abb{
 	nodo_abb_t * raiz; 
 	abb_comparar_clave_t comparador;
 	abb_destruir_dato_t destructor;
 	size_t cantidad;
-}abb_t;
+};
 
 /*Crea un arbol asignandole su memoria, si falla devuelve NULL
  *
@@ -426,6 +426,7 @@ void abb_destruir(abb_t *arbol){
 
 }
 
+//EL ITERADOR INTERNOSERA IN-ORDER
 //==============================================================================
 /*
 
@@ -450,28 +451,84 @@ void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, voi
 	
 */
 //==============================================================================
+struct abb_iter{
+  pila_t* pila;
+  const abb_t *arbol;
+};
 
+/*
+te saco esto
 typedef struct abb_iter {
 	abb_t *arbol;
 }abb_iter_t;
+*/
 
 //Crea un iterador. Devuelve NULL si falla
 //Pre: La estructura arbol recibida fue inicializada
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
+	/*
+	implementacion tomas
 	abb_iter_t * iter = malloc(sizeof(abb_iter_t));
 	if (iter){
 		iter->arbol = arbol; // ESTA LINEA TIRA ERROR EL COMPILADOR, QUIZA HAYA QUE HACER UNA COPIA
 	}						// DEL ARBOL, Y LUEGO HACERLE EL ITERADOR A ESA COPIA
+	return iter;	
+	*/
+	if(!arbol){
+		return NULL;
+	}
+	abb_iter_t *iter = malloc(sizeof(abb_iter_t));
+	if (!iter)
+		return NULL;
+	pila_t *pila = pila_crear();
+	if (!pila){
+		free(iter);
+		return NULL;
+	}	
+	iter->pila = pila;
+	nodo_abb_t *nodo = arbol->raiz;
+    while (nodo){
+
+		pila_apilar(iter->pila, nodo);
+		nodo = nodo->izq;
+    }
+	 //creo que esta seria la implementacion mas efectiva para ya meter los izquierdos
 	return iter;
+	
+
 }
 
-bool abb_iter_in_avanzar(abb_iter_t *iter);
+bool abb_iter_in_avanzar(abb_iter_t *iter){
+	if (abb_iter_in_al_final(iter)){
+		return false;
+	}
+	nodo_abb_t *nodo = pila_desapilar(iter->pila);
+	nodo = nodo->der;
+	while (nodo)
+	{
+		pila_apilar(iter->pila, nodo);
+		nodo = nodo->izq;
+	}
+	return true;
+}
 
 
-const char *abb_iter_in_ver_actual(const abb_iter_t *iter);
+bool abb_iter_in_al_final(const abb_iter_t *iter){
+	return (pila_esta_vacia(iter->pila));
+}
 
 
-bool abb_iter_in_al_final(const abb_iter_t *iter);
+const char *abb_iter_in_ver_actual(const abb_iter_t *iter){
+	if (abb_iter_in_al_final(iter)) {
+    	return NULL;
+  	}
+	nodo_abb_t *nodo_actual = pila_ver_tope(iter->pila);
+
+	return nodo_actual->clave;
+}
 
 
-void abb_iter_in_destruir(abb_iter_t* iter);
+void abb_iter_in_destruir(abb_iter_t* iter){
+	pila_destruir(iter->pila);
+	free(iter);
+}

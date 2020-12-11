@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "pila.h"
 
 
 
@@ -76,19 +77,19 @@ void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, voi
 
 typedef struct abb_iter abb_iter_t;
 
-
+// Crea iterador
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol);
 
-
+// Avanza iterador
 bool abb_iter_in_avanzar(abb_iter_t *iter);
 
-
+// Devuelve clave actual
 const char *abb_iter_in_ver_actual(const abb_iter_t *iter);
 
-
+// Comprueba si terminó la iteración
 bool abb_iter_in_al_final(const abb_iter_t *iter);
 
-
+// Destruye iterador
 void abb_iter_in_destruir(abb_iter_t* iter);
 
 
