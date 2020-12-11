@@ -432,48 +432,32 @@ void abb_destruir(abb_t *arbol){
 
 void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *cadena, void *dato, void *extra), void *extra, bool * continuar){
 	if(nodo->izq != NULL && (*continuar == true)){
-    abb_in_order_(nodo->izq, visitar(nodo->izq->clave, nodo->izq->elemento, extra), extra, &(*continuar));
+    abb_in_order_(nodo->izq, visitar(const char *cadena, void *dato, void *extra), extra, &(*continuar));
 	}
 	*continuar = *continuar && visitar(nodo->clave, nodo->elemento, extra, &(*continuar));
 	if(nodo->der != NULL && (*continuar == true)){
-    abb_in_order_(nodo->der, visitar(nodo->der->clave, nodo->der->elemento, extra), extra, &(*continuar));
+    abb_in_order_(nodo->der, visitar(const char *cadena, void *dato, void *extra), extra, &(*continuar));
 	}
 }
 
 void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, void *extra), void *extra){
 	if (!abb_vacio(arbol)){
 		bool continuar = true;
-		abb_in_order_(arbol->raiz, visitar(cadena, dato, extra), extra, &continuar);
+		abb_in_order_(arbol->raiz, visitar(const char *, void *, void *), extra, &continuar);
 		
 	}
-
 }
-	
-*/
+	*/
 //==============================================================================
 struct abb_iter{
   pila_t* pila;
   const abb_t *arbol;
 };
 
-/*
-te saco esto
-typedef struct abb_iter {
-	abb_t *arbol;
-}abb_iter_t;
-*/
-
 //Crea un iterador. Devuelve NULL si falla
 //Pre: La estructura arbol recibida fue inicializada
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
-	/*
-	implementacion tomas
-	abb_iter_t * iter = malloc(sizeof(abb_iter_t));
-	if (iter){
-		iter->arbol = arbol; // ESTA LINEA TIRA ERROR EL COMPILADOR, QUIZA HAYA QUE HACER UNA COPIA
-	}						// DEL ARBOL, Y LUEGO HACERLE EL ITERADOR A ESA COPIA
-	return iter;	
-	*/
+
 	if(!arbol){
 		return NULL;
 	}
