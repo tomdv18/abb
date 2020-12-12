@@ -428,26 +428,26 @@ void abb_destruir(abb_t *arbol){
 
 //EL ITERADOR INTERNO SERA IN-ORDER
 //==============================================================================
-/*
 
-void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *cadena, void *dato, void *extra), void *extra, bool * continuar){
+
+void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *, void *, void *), void *extra, bool * continuar){
 	if(nodo->izq != NULL && (*continuar == true)){
-    abb_in_order_(nodo->izq, visitar(const char *cadena, void *dato, void *extra), extra, &(*continuar));
+    abb_in_order_(nodo->izq, visitar, extra, &(*continuar));
 	}
-	*continuar = *continuar && visitar(nodo->clave, nodo->elemento, extra, &(*continuar));
+	*continuar = *continuar && visitar(nodo->clave, nodo->elemento, extra);
 	if(nodo->der != NULL && (*continuar == true)){
-    abb_in_order_(nodo->der, visitar(const char *cadena, void *dato, void *extra), extra, &(*continuar));
+    abb_in_order_(nodo->der, visitar, extra, &(*continuar));
 	}
 }
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, void *extra), void *extra){
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
 	if (!abb_vacio(arbol)){
 		bool continuar = true;
-		abb_in_order_(arbol->raiz, visitar(const char *, void *, void *), extra, &continuar);
+		abb_in_order_(arbol->raiz, visitar, extra, &continuar);
 		
 	}
 }
-	*/
+
 //==============================================================================
 struct abb_iter{
   pila_t* pila;

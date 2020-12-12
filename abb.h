@@ -69,7 +69,7 @@ void abb_destruir(abb_t *arbol);
 //==============================================================================
 
 
-void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, void *extra), void *extra);
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
 
 
 //==============================================================================

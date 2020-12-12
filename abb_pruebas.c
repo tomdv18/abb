@@ -389,6 +389,8 @@ static void prueba_abb_iterar_volumen(size_t largo)
     abb_iter_in_destruir(iter);
     abb_destruir(arbol);
 }
+
+
 /* ******************************************************************
  *                        FUNCIÓN PRINCIPAL
  * *****************************************************************/
@@ -410,16 +412,10 @@ void pruebas_abb()
     prueba_arbol_valor_null();
     prueba_abb_iterar();
     prueba_abb_iterar_volumen(5000);
-    /*
 
-
-    prueba_hash_iterar();
-    prueba_hash_iterar_volumen(5000);
 }
 
 void pruebas_volumen_catedra(size_t largo)
 {
-    prueba_hash_volumen(largo, false);
-}
-*/
+    prueba_abb_volumen(largo, false);
 }
