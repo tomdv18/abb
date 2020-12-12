@@ -426,7 +426,7 @@ void abb_destruir(abb_t *arbol){
 
 }
 
-//EL ITERADOR INTERNOSERA IN-ORDER
+//EL ITERADOR INTERNO SERA IN-ORDER
 //==============================================================================
 /*
 
@@ -451,7 +451,7 @@ void abb_in_order(abb_t *arbol, bool visitar(const char *cadena, void *dato, voi
 //==============================================================================
 struct abb_iter{
   pila_t* pila;
-  const abb_t *arbol;
+  
 };
 
 //Crea un iterador. Devuelve NULL si falla
@@ -464,6 +464,7 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
 	abb_iter_t *iter = malloc(sizeof(abb_iter_t));
 	if (!iter)
 		return NULL;
+
 	pila_t *pila = pila_crear();
 	if (!pila){
 		free(iter);
@@ -471,15 +472,13 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
 	}	
 	iter->pila = pila;
 	nodo_abb_t *nodo = arbol->raiz;
-    while (nodo){
-
+    while(nodo){
 		pila_apilar(iter->pila, nodo);
 		nodo = nodo->izq;
     }
-	 //creo que esta seria la implementacion mas efectiva para ya meter los izquierdos
+	 
 	return iter;
 	
-
 }
 
 bool abb_iter_in_avanzar(abb_iter_t *iter){
@@ -488,8 +487,8 @@ bool abb_iter_in_avanzar(abb_iter_t *iter){
 	}
 	nodo_abb_t *nodo = pila_desapilar(iter->pila);
 	nodo = nodo->der;
-	while (nodo)
-	{
+	while(nodo){
+	
 		pila_apilar(iter->pila, nodo);
 		nodo = nodo->izq;
 	}

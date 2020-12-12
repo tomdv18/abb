@@ -266,7 +266,129 @@ static void prueba_abb_volumen(size_t largo, bool debug){
 
 }
 
+static ssize_t buscar(const char* clave, char* claves[], size_t largo)
+{
+    for (size_t i = 0; i < largo; i++) {
+        if (strcmp(clave, claves[i]) == 0) return (ssize_t) i;
+    }
+    return -1;
+}
 
+static void prueba_abb_iterar(){
+
+    abb_t* arbol = abb_crear(strcmp, NULL);
+
+    char *claves[] = {"perro", "gato", "vaca"};
+    char *valores[] = {"guau", "miau", "mu"};
+
+    /* Inserta 3 valores */
+    print_test("Prueba abb insertar clave1", abb_guardar(arbol, claves[0], valores[0]));
+    print_test("Prueba abb insertar clave2", abb_guardar(arbol, claves[1], valores[1]));
+    print_test("Prueba abb insertar clave3", abb_guardar(arbol, claves[2], valores[2]));
+
+    // Prueba de iteración sobre las claves almacenadas.
+    abb_iter_t *iter = abb_iter_in_crear(arbol);
+    const char *clave;
+    ssize_t indice;
+
+    print_test("Prueba abb iterador esta al final, es false", !abb_iter_in_al_final(iter));
+
+    /* Primer valor */
+    clave = abb_iter_in_ver_actual(iter);
+    indice = buscar(clave, claves, sizeof(claves) / sizeof(char *));
+    print_test("Prueba abb iterador ver actual, es una clave valida", indice != -1);
+    print_test("Prueba abb iterador ver actual, no es el mismo puntero", clave != claves[indice]);
+    print_test("Prueba abb iterador avanzar es true", abb_iter_in_avanzar(iter));
+    print_test("Prueba abb iterador esta al final, es false", !abb_iter_in_al_final(iter));
+
+    /* Segundo valor */
+    clave = abb_iter_in_ver_actual(iter);
+    indice = buscar(clave, claves, sizeof(claves) / sizeof(char *));
+    print_test("Prueba abb iterador ver actual, es una clave valida", indice != -1);
+    print_test("Prueba abb iterador ver actual, no es el mismo puntero", clave != claves[indice]);
+    print_test("Prueba abb iterador avanzar es true", abb_iter_in_avanzar(iter));
+    print_test("Prueba abb iterador esta al final, es false", !abb_iter_in_al_final(iter));
+
+    /* Tercer valor */
+    clave = abb_iter_in_ver_actual(iter);
+    indice = buscar(clave, claves, sizeof(claves) / sizeof(char *));
+    print_test("Prueba abb iterador ver actual, es una clave valida", indice != -1);
+    print_test("Prueba abb iterador ver actual, no es el mismo puntero", clave != claves[indice]);
+    abb_iter_in_avanzar(iter);
+    print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
+
+    /* Vuelve a tratar de avanzar, por las dudas */
+    print_test("Prueba abb iterador ver actual, es NULL", !abb_iter_in_ver_actual(iter));
+    print_test("Prueba abb iterador avanzar es false", !abb_iter_in_avanzar(iter));
+    print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
+
+    abb_iter_in_destruir(iter);
+    abb_destruir(arbol);
+}
+
+static void prueba_abb_iterar_volumen(size_t largo)
+{
+    abb_t* arbol = abb_crear(strcmp, NULL);
+
+    const size_t largo_clave = 10;
+    char (*claves)[largo_clave] = malloc(largo * largo_clave);
+
+    size_t valores[largo];
+
+    /* Inserta 'largo' parejas en el abb */
+    bool ok = true;
+    for (unsigned i = 0; i < largo; i++) {
+        sprintf(claves[i], "%08d", i);
+        valores[i] = i;
+        ok = abb_guardar(arbol, claves[i], &valores[i]);
+        if (!ok) break;
+    }
+
+    // Prueba de iteración sobre las claves almacenadas.
+    abb_iter_t *iter = abb_iter_in_crear(arbol);
+    
+    print_test("Prueba abb iterador esta al final, es false", !abb_iter_in_al_final(iter));
+
+    ok = true;
+    unsigned i;
+    const char *clave;
+    size_t *valor;
+
+    for (i = 0; i < largo; i++) {
+        if ( abb_iter_in_al_final(iter) ) {
+            ok = false;
+            break;
+        }
+        clave = abb_iter_in_ver_actual(iter);
+        if ( clave == NULL ) {
+            ok = false;
+            break;
+        }
+        valor = abb_obtener(arbol, clave); 
+        if ( valor == NULL ) {
+            ok = false;
+            break;
+        }
+        *valor = largo;
+        abb_iter_in_avanzar(iter);
+    }
+    print_test("Prueba abb iteración en volumen", ok);
+    print_test("Prueba abb iteración en volumen, recorrio todo el largo", i == largo);
+    print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
+
+    ok = true;
+    for (i = 0; i < largo; i++) {
+        if ( valores[i] != largo ) {
+            ok = false;
+            break;
+        }
+    }
+    print_test("Prueba abb iteración en volumen, se cambiaron todo los elementos", ok);
+
+    free(claves);
+    abb_iter_in_destruir(iter);
+    abb_destruir(arbol);
+}
 /* ******************************************************************
  *                        FUNCIÓN PRINCIPAL
  * *****************************************************************/
@@ -286,6 +408,8 @@ void pruebas_abb()
     prueba_abb_clave_vacia();
     prueba_abb_volumen(5000, true);
     prueba_arbol_valor_null();
+    prueba_abb_iterar();
+    prueba_abb_iterar_volumen(5000);
     /*
 
 
