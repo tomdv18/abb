@@ -396,7 +396,7 @@ static void prueba_abb_iterar_volumen(size_t largo)
  * *****************************************************************/
 
 
-void pruebas_abb()
+void pruebas_abb_estudiante()
 {
     /* Ejecuta todas las pruebas unitarias.
      */
@@ -413,9 +413,4 @@ void pruebas_abb()
     prueba_abb_iterar();
     prueba_abb_iterar_volumen(5000);
 
-}
-
-void pruebas_volumen_catedra(size_t largo)
-{
-    prueba_abb_volumen(largo, false);
 }

@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include "pila.h"
+
 const int SIN_HIJOS = 0;
 const int UN_HIJO = 1;
 const int DOS_HIJOS = 2;
@@ -43,15 +45,6 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 void  borrar_nodo(nodo_abb_t * nodo){
 	free(nodo->clave);
 	free(nodo);
-}
-
-
-/* 
- * Recibe un arbol previamente inicializado 
- * Devuelve verdadero si su cantidad de elementos es igual a cero
- */
-bool abb_vacio(const abb_t * arbol){
-	return(abb_cantidad(arbol) == 0);
 }
 
 /*Pre: Recibe un arbol y dos nodos
@@ -147,7 +140,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 	nodo_insertar->clave = copia;
 	nodo_insertar->izq = NULL;
 	nodo_insertar->der = NULL;
-	if (abb_vacio(arbol)){
+	if (abb_cantidad(arbol) == 0){
 		arbol->raiz = nodo_insertar;
 		arbol->cantidad++;
 		return true;
@@ -312,7 +305,7 @@ void * raiz_borrar(abb_t *arbol, const char * clave){
  * en el caso de que estuviera guardado.
  */
 void *abb_borrar(abb_t *arbol, const char *clave){
-	if (!abb_pertenece(arbol, clave) || abb_vacio(arbol)){
+	if (!abb_pertenece(arbol, clave) || abb_cantidad(arbol) == 0){
 		return NULL;
 	}
 	arbol->cantidad--;
@@ -346,7 +339,7 @@ void *abb_obtener_(nodo_abb_t * nodo, const char* clave, const abb_t * arbol){
  * Pre: La estructura fue inicializada
  */
 void *abb_obtener(const abb_t *arbol, const char *clave){
-	if (abb_vacio(arbol)){
+	if (arbol->cantidad == 0){
 		return NULL;
 	}
 	return abb_obtener_(arbol->raiz, clave, arbol);
@@ -384,7 +377,7 @@ bool _abb_pertenece(nodo_abb_t * nodo, const char *clave_buscada, abb_comparar_c
  *Pre: La estructura fue inicializada
  */
 bool abb_pertenece(const abb_t *arbol, const char *clave){
-	if (abb_vacio(arbol)){
+	if (arbol->cantidad == 0){
 		return false;
 	}
 	return _abb_pertenece(arbol->raiz, clave, arbol->comparador);
@@ -394,7 +387,7 @@ bool abb_pertenece(const abb_t *arbol, const char *clave){
 /* Devuelve la cantidad de elementos del arbol.
  * Pre: La estructura fue inicializada
  */
-size_t abb_cantidad(const abb_t *arbol){
+size_t abb_cantidad(abb_t *arbol){
 	return (arbol->cantidad);
 }
 
@@ -419,7 +412,7 @@ void destruir_nodos(nodo_abb_t * nodo, abb_t *arbol){
  * Post: La estructura arbol fue destruida
  */
 void abb_destruir(abb_t *arbol){
-	if (!abb_vacio(arbol)){
+	if (!abb_cantidad(arbol) == 0){
 		destruir_nodos(arbol->raiz, arbol);
 	}
 	free(arbol);
@@ -441,7 +434,7 @@ void abb_in_order_(nodo_abb_t * nodo, bool visitar(const char *, void *, void *)
 }
 
 void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
-	if (!abb_vacio(arbol)){
+	if (!abb_cantidad(arbol) == 0){
 		bool continuar = true;
 		abb_in_order_(arbol->raiz, visitar, extra, &continuar);
 		
