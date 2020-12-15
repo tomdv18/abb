@@ -6,7 +6,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>  // For ssize_t in Linux.
+typedef struct nodo_abb{
+    struct nodo_abb * izq;
+    struct nodo_abb * der;
+    char *clave;
+    void * elemento;
+}nodo_abb_t;
 
+struct abb{
+    nodo_abb_t * raiz; 
+    abb_comparar_clave_t comparador;
+    abb_destruir_dato_t destructor;
+    size_t cantidad;
+};
 
 /* ******************************************************************
  *                        PRUEBAS UNITARIAS
@@ -94,7 +106,6 @@ static void prueba_arbol_reemplazar(){
     print_test("Prueba arbol obtener clave2 es valor2a", abb_obtener(abb, clave2) == valor2a);
     print_test("Prueba arbol obtener clave2 es valor2a", abb_obtener(abb, clave2) == valor2a);
     print_test("Prueba arbol la cantidad de elementos es 2", abb_cantidad(abb) == 2);
-
     print_test("Prueba arbol insertar clave1 con otro valor", abb_guardar(abb, clave1, valor1b));
     print_test("Prueba arbol obtener clave1 es valor1b", abb_obtener(abb, clave1) == valor1b);
     print_test("Prueba arbol obtener clave1 es valor1b", abb_obtener(abb, clave1) == valor1b);
@@ -390,27 +401,165 @@ static void prueba_abb_iterar_volumen(size_t largo)
     abb_destruir(arbol);
 }
 
+/*
+bool visitar_imprimiendo(const char* clave, void * dato, void *extra){
+    int * punchi = extra;
+        printf(" %d. %s \n", (*punchi)++, clave);
+    return true;
+}
+*/
+void pruebas_insertar_borrar_5(){
+
+    char *primero = "aaaa";
+    char *sehgun = "bbbb";
+    char *terce = "cccc";
+    char *cuarto = "dddd";
+    char *quint = "eeee";
+    
+    char * valor1_no = "18";
+    char * valor2_no = "8";
+    char * valor3_no = "2000";
+    char * valor4_no = "123";
+    char * valor5_no = "321";
+
+
+    abb_t* arbol = abb_crear(strcmp, NULL);
+    bool ok = true;
+    
+    ok = ok && abb_guardar(arbol, primero, valor1_no);
+    ok = ok && abb_guardar(arbol, sehgun, valor2_no);
+    ok = ok && abb_guardar(arbol, terce, valor3_no); 
+    ok = ok && abb_guardar(arbol, cuarto, valor4_no);
+    ok = ok && abb_guardar(arbol, quint, valor5_no);
+
+    print_test("Insertados 5", ok);
+    abb_iter_t * iter = abb_iter_in_crear(arbol);
+
+    print_test("Iterador creado. No estoy al final", !abb_iter_in_al_final(iter));
+    bool avanzando = true;
+    avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", !abb_iter_in_al_final(iter));
+    avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", !abb_iter_in_al_final(iter));  
+    avanzando = abb_iter_in_avanzar(iter);    
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", 
+    !abb_iter_in_al_final(iter));  
+    avanzando = abb_iter_in_avanzar(iter);    
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", !abb_iter_in_al_final(iter));  
+    avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("estoy al final", abb_iter_in_al_final(iter));
+    abb_iter_in_destruir(iter);
+    bool elementos_correctos = true;
+    
+    //int extra = 0;
+    //abb_in_order(arbol, visitar_imprimiendo, &extra);
+
+    void * primer_borrado =    abb_borrar(arbol, primero);
+    elementos_correctos = elementos_correctos && (valor1_no == primer_borrado);      
+    void * segundo_borrado =    abb_borrar(arbol, sehgun);
+    elementos_correctos = elementos_correctos && ((valor2_no == segundo_borrado));    
+    void * tercer_borrado =    abb_borrar(arbol, terce);
+    elementos_correctos = elementos_correctos && ((valor3_no ==tercer_borrado));   
+    void * cuarto_borrado =    abb_borrar(arbol, cuarto);
+    elementos_correctos = elementos_correctos && ((valor4_no ==cuarto_borrado));      
+    void * quinto_borrado =    abb_borrar(arbol, quint);
+    elementos_correctos = elementos_correctos && ((valor5_no == quinto_borrado));    
+    
+
+
+    print_test("Cantidad correcta",abb_cantidad(arbol) == 0);
+    print_test("Quitados del arbol correctamente", elementos_correctos);
+
+    abb_destruir(arbol);
+}
+
+void pruebas_insertar_borrar_3_memoria(){
+
+    char *primero = "a";
+    char *sehgun = "b";
+    char *terce = "c";
+    int * valor  =  malloc(sizeof(int));
+    int * valor2 =  malloc(sizeof(int));
+    int * valor3 =  malloc(sizeof(int));
+
+
+
+    abb_t* arbol = abb_crear(strcmp, free);
+    bool ok = true;
+    ok = ok && abb_guardar(arbol, sehgun, valor2);
+    ok = ok && abb_guardar(arbol, primero, valor);
+    ok = ok && abb_guardar(arbol, terce, valor3);
+
+    print_test("Insertados 3 elementos con memoria reservada", ok);
+    abb_iter_t * iter = abb_iter_in_crear(arbol);
+
+    print_test("Iterador creado. No estoy al final", !abb_iter_in_al_final(iter));
+    bool avanzando = true;
+    avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", !abb_iter_in_al_final(iter));
+    avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("No estoy al final", !abb_iter_in_al_final(iter));  
+    avanzando = abb_iter_in_avanzar(iter);
+    //print_test("Avanzando", avanzando);
+    //print_test("No estoy al final", !abb_iter_in_al_final(iter));  
+    //avanzando = abb_iter_in_avanzar(iter);
+    print_test("Avanzando Iterador", avanzando);
+    print_test("estoy al final", abb_iter_in_al_final(iter));
+    abb_iter_in_destruir(iter);
+    print_test("Cantidad correcta",abb_cantidad(arbol) == 3);
+    bool elementos_correctos = true;
+    void * segundo_borrado =   abb_borrar(arbol, sehgun);
+    printf("aca\n");
+    void * tercer_borrado =    abb_borrar(arbol, terce);
+    printf("ac2\n");
+    void * primer_borrado =    abb_borrar(arbol, primero);
+    elementos_correctos = elementos_correctos && ((valor2 == segundo_borrado));    
+    elementos_correctos = elementos_correctos && (valor == primer_borrado);      
+    elementos_correctos = elementos_correctos && ((valor3 ==tercer_borrado));    
+    print_test("Cantidad correcta en arbol vacio",abb_cantidad(arbol) == 0);
+    print_test("Quitados del arbol correctamente", elementos_correctos);
+    free(primer_borrado);
+    free(tercer_borrado);
+    free(segundo_borrado);
+    abb_destruir(arbol);
+}
+
 
 /* ******************************************************************
  *                        FUNCIÓN PRINCIPAL
  * *****************************************************************/
 
 
-void pruebas_abb_estudiante()
-{
+
+
+void pruebas_abb_estudiante(){
     /* Ejecuta todas las pruebas unitarias.
      */
     prueba_crear();
     prueba_crear_sin_funcion_comparacion();
     prueba_iterar_arbol_vacio();
     prueba_arbol_insertar();
+    pruebas_insertar_borrar_5();
+    pruebas_insertar_borrar_3_memoria();
+}
+void pruebas_volumen_catedra(size_t largo){
     prueba_arbol_reemplazar();
     prueba_arbol_reemplazar_con_destructor();
     prueba_arbol_borrar();
     prueba_abb_clave_vacia();
-    prueba_abb_volumen(5000, true);
+    prueba_abb_volumen(3000, true);
     prueba_arbol_valor_null();
     prueba_abb_iterar();
     prueba_abb_iterar_volumen(5000);
-
+    printf("Aa\n");
+}
+void nuevas_pruebas(){
+    printf("Aa\n");
 }
