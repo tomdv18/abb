@@ -187,18 +187,38 @@ int cantidad_de_hijos(nodo_abb_t * nodo){
 	}
 	return SIN_HIJOS;
 }
-
+nodo_abb_t * buscar_anterior(nodo_abb_t * nodo){
+	nodo_abb_t * nodo_anterior;
+	nodo_abb_t * nodo_act;
+	if ( nodo->der != NULL){
+		nodo_act = nodo->der;
+		nodo_anterior = nodo;	
+	while(nodo_act->izq != NULL){			// CASO MENOR MAYOR
+		nodo_anterior = nodo_act; 
+		nodo_act = nodo_act->izq;
+		}
+	return nodo_anterior;
+	}
+	if ( nodo->izq != NULL){
+	nodo_act = nodo->izq;
+	nodo_anterior = nodo;	
+	while(nodo_act->der != NULL){			// CASO MAYOR MENOR
+		nodo_anterior = nodo_act;
+		nodo_act = nodo_act->der;
+		}
+	return nodo_anterior;
+	}
+	return NULL;
+}
 
 //	Pre: recibe un nodo con dos hijos
 //  Devuelve el nodo reemplazante, el cual servira para borrar el nodo actual
 //
-nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior/*, bool es_raiz*/){
+nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo/*, bool es_raiz*/){
 	nodo_abb_t * nodo_reem;
-	anterior = nodo;	
 	if ( nodo->der != NULL){
-		nodo_reem = nodo->der;
+		nodo_reem = nodo->der;	
 	while(nodo_reem->izq != NULL){			// CASO MENOR MAYOR
-		anterior = nodo; 
 		nodo_reem = nodo_reem->izq;
 		}
 	return nodo_reem;
@@ -207,7 +227,6 @@ nodo_abb_t * buscar_reemplazante(nodo_abb_t * nodo, nodo_abb_t * anterior/*, boo
 	if ( nodo->izq != NULL){
 	nodo_reem = nodo->izq;
 	while(nodo_reem->der != NULL){			// CASO MAYOR MENOR
-		anterior = nodo;
 		nodo_reem = nodo_reem->der;
 		}
 	return nodo_reem;
@@ -227,10 +246,10 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 		void * dato = nodo->elemento;
 		int hijos = cantidad_de_hijos(nodo);
 		if ( hijos == DOS_HIJOS){
-			nodo_abb_t * anterior_reemplazante = NULL;
-			nodo_abb_t * reemplazante = buscar_reemplazante(nodo, anterior_reemplazante /*,false*/);
-			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, cmp);
+			nodo_abb_t * anterior_reemplazante = buscar_anterior(nodo);
+			nodo_abb_t * reemplazante = buscar_reemplazante(nodo /*,false*/);
 			strcpy(nodo->clave, reemplazante->clave);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, cmp);
 			nodo->elemento = dato_suplente;
 			return dato;
 		}
@@ -253,7 +272,7 @@ void * abb_borrar_(nodo_abb_t * nodo_anterior, nodo_abb_t * nodo, const char *cl
 			}
 		}
 		if (hijos == SIN_HIJOS){
-			if (nodo_anterior->izq != NULL){
+			if (nodo_anterior->izq == nodo){
 				nodo_anterior->izq = NULL;
 			}
 			else{
@@ -285,10 +304,10 @@ void * raiz_borrar(abb_t *arbol, const char * clave){
 		dato = a_borrar->elemento;
 		int hijos = cantidad_de_hijos(a_borrar);
 		if ( hijos == DOS_HIJOS){
-			nodo_abb_t * anterior_reemplazante = NULL; 
-			nodo_abb_t * reemplazante = buscar_reemplazante(arbol->raiz, anterior_reemplazante /*,true*/);
-			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, arbol->comparador);
+			nodo_abb_t * anterior_reemplazante = buscar_anterior(a_borrar);
+			nodo_abb_t * reemplazante = buscar_reemplazante(a_borrar /*,true*/);
 			strcpy(arbol->raiz->clave, reemplazante->clave);
+			void * dato_suplente = abb_borrar_(anterior_reemplazante, reemplazante, reemplazante->clave, arbol->comparador);
 			arbol->raiz->elemento = dato_suplente;
 			return dato;	
 		}

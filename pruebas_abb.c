@@ -516,13 +516,13 @@ void pruebas_insertar_borrar_3_memoria(){
     print_test("Cantidad correcta",abb_cantidad(arbol) == 3);
     bool elementos_correctos = true;
     void * segundo_borrado =   abb_borrar(arbol, sehgun);
-    printf("aca\n");
-    void * tercer_borrado =    abb_borrar(arbol, terce);
-    printf("ac2\n");
-    void * primer_borrado =    abb_borrar(arbol, primero);
     elementos_correctos = elementos_correctos && ((valor2 == segundo_borrado));    
-    elementos_correctos = elementos_correctos && (valor == primer_borrado);      
+    print_test("Quitados del arbol correctamente", elementos_correctos);
+    void * tercer_borrado =    abb_borrar(arbol, terce);
     elementos_correctos = elementos_correctos && ((valor3 ==tercer_borrado));    
+    print_test("Quitados del arbol correctamente", elementos_correctos);
+    void * primer_borrado =    abb_borrar(arbol, primero);
+    elementos_correctos = elementos_correctos && (valor == primer_borrado);      
     print_test("Cantidad correcta en arbol vacio",abb_cantidad(arbol) == 0);
     print_test("Quitados del arbol correctamente", elementos_correctos);
     free(primer_borrado);
@@ -548,16 +548,16 @@ void pruebas_abb_estudiante(){
     prueba_arbol_insertar();
     pruebas_insertar_borrar_5();
     pruebas_insertar_borrar_3_memoria();
-}
-void pruebas_volumen_catedra(size_t largo){
+    prueba_arbol_borrar();
     prueba_arbol_reemplazar();
     prueba_arbol_reemplazar_con_destructor();
-    prueba_arbol_borrar();
     prueba_abb_clave_vacia();
-    prueba_abb_volumen(3000, true);
+    prueba_abb_volumen(2000, true);
     prueba_arbol_valor_null();
     prueba_abb_iterar();
-    prueba_abb_iterar_volumen(5000);
+    prueba_abb_iterar_volumen(2000);
+}
+void pruebas_volumen_catedra(size_t largo){
     printf("Aa\n");
 }
 void nuevas_pruebas(){
